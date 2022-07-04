@@ -1,0 +1,73 @@
+server:
+  port: 80
+
+spring:
+#  redis:
+#    host: redis-server
+#    port: 6380
+#    password: Ltd3411??
+  application:
+    name: gateway-server
+  cloud:
+    nacos:
+      discovery:
+        server-addr: nacos-server:8848  #修改本机的hosts文件
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true  # 启用小驼峰的服务名称访问服务
+      routes: # 自定义路由机制
+        - id: admin-service-router   # /admin/**--->admin-service
+          uri: lb://admin-service
+          predicates:
+            - Path=/admin/**
+          filters:
+            - StripPrefix=1 #当访问/admin/login -> 去掉admin后  /login/**
+        - id: member-service-router  # /member/**--->member-service
+          uri: lb://member-service
+          predicates:
+            - Path=/user/**
+          filters:
+            - StripPrefix=1
+        - id: finance-service-router  # /finance/**--->finance-service
+          uri: lb://finance-service
+          predicates:
+            - Path=/finance/**
+        - id: chan-service-router    # /chan/**--->chan-service
+          uri: lb://chan-service
+          predicates:
+            - Path=/chan/**
+        - id: statistics-service-router # /statistics/**--->statistics-service
+          uri: lb://statistics-service
+          predicates:
+            - Path=statistics/**
+        - id: match-service-router   # /match/**--->match-service
+          uri: lb://match-service
+          predicates:
+            - Path=/match/**
+        - id: exchange-service-router  # /exchange/**--->exchange-service
+          uri: lb://exchange-service
+          predicates:
+            - Path=/exchange/**
+
+    sentinel:
+      transport:
+        #        dashboard: sentinel-server:8858
+        dashboard: sentinel-server:8858
+      datasource: #网关+API分组的限流
+        ds1.nacos:
+          serverAddr: nacos-server:8848
+          dataId: gw-flow
+          ruleType: gw-flow
+#        ds1.file:
+#          file: classpath:gw-flow.json  # 网关 + API分组的限流
+#          ruleType: gw_flow
+
+        ds2.nacos:
+          serverAddr: nacos-server:8848
+          dataId: api-group
+          ruleType: gw_api_group
+#        ds2.file:
+#          file: classpath:api-group.json
+#          ruleType: gw_api_group

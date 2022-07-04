@@ -12,13 +12,14 @@
     <artifactId>coin-iaas</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>gateway-server</module>
         <module>authorization-server</module>
+        <module>gateway-server</module>
     </modules>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
+
 
 </project>
