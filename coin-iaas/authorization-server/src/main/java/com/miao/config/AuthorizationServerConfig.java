@@ -2,9 +2,11 @@ package com.miao.config;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.core.io.ClassPathResource;
+//import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
@@ -15,6 +17,9 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.security.oauth2.provider.token.store.KeyStoreKeyFactory;
 import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
 
 /**
@@ -31,11 +36,12 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Qualifier("userServiceDetailsServiceImpl")
     @Autowired
     private UserDetailsService userDetailsService;
 
-    @Autowired
-    private RedisConnectionFactory redisConnectionFactory;
+//    @Autowired
+//    private RedisConnectionFactory redisConnectionFactory;
 
 
 
@@ -62,17 +68,36 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
      */
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-        endpoints.tokenStore(new InMemoryTokenStore())
-                .authenticationManager(authenticationManager)
+        endpoints.authenticationManager(authenticationManager)
                 .userDetailsService(userDetailsService)
-                .tokenStore(redisTokenStore())
-        ;
+                .tokenStore(jwtTokenStore())// tokenStore 来存储我们的token jwt 存储token
+                .tokenEnhancer(jwtAccessTokenConverter());
         super.configure(endpoints);
     }
 
-    private TokenStore redisTokenStore() {
-        return new RedisTokenStore(redisConnectionFactory);
+    private TokenStore jwtTokenStore() {
+        JwtTokenStore jwtTokenStore = new JwtTokenStore(jwtAccessTokenConverter());
+        return jwtTokenStore;
     }
+
+
+
+    private JwtAccessTokenConverter jwtAccessTokenConverter() {
+
+        //  1、创建个jwt令牌转换器
+        JwtAccessTokenConverter tokenConverter = new JwtAccessTokenConverter();
+        //  2、加载我们的私钥
+        ClassPathResource classPathResource = new ClassPathResource("coinexchange.jks");
+        KeyStoreKeyFactory keyStoreKeyFactory = new KeyStoreKeyFactory(classPathResource, "coinexchange".toCharArray());
+        //  3、设置密钥对
+        tokenConverter.setKeyPair(keyStoreKeyFactory.getKeyPair("coinexchange", "coinexchange".toCharArray()));
+        return tokenConverter;
+    }
+
+
+//    private TokenStore redisTokenStore() {
+//        return new RedisTokenStore(redisConnectionFactory);
+//    }
 
 
 

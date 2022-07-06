@@ -43,13 +43,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     /**
      * 创建一个测试的UserDetail
      */
-    @Bean
-    public UserDetailsService userDetailsService() {
-        InMemoryUserDetailsManager inMemoryUserDetailsManager = new InMemoryUserDetailsManager();
-        User user = new User("admin", "123456", Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIn")));
-        inMemoryUserDetailsManager.createUser(user);
-        return inMemoryUserDetailsManager;
-    }
+//    @Bean
+//    public UserDetailsService userDetailsService() {
+//        InMemoryUserDetailsManager inMemoryUserDetailsManager = new InMemoryUserDetailsManager();
+//        User user = new User("admin", "123456", Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIn")));
+//        inMemoryUserDetailsManager.createUser(user);
+//        return inMemoryUserDetailsManager;
+//    }
 
     /**
      * 密码加密
